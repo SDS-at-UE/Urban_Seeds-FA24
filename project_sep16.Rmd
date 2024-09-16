@@ -1,0 +1,204 @@
+---
+title: "Untitled"
+output: html_document
+date: "2024-09-04"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+questions: 
+-How many customers in each zip code? 
+  - make a map for where majority of customers are
+-How does the amount of each specific product bought change during the months? 
+-How many customers order each month?
+-How does the total completed orders change throughout the months? 
+-What months do they have the highest revenue? 
+-How many orders are cancelled? What are the products cancelled? How much money is refunded?
+
+
+for portal:
+make a slider that has product ID on it and then the graph has the amount of selected products at each month
+
+
+```{r}
+(urban_seeds <- read.csv("G:/My Drive/a.UE24-25/STAT300/Updated_data_orders_2024_08_14.csv"))
+```
+
+
+
+```{r}
+products <- urban_seeds[,"Product.Details"]
+
+```
+
+
+```{r}
+pdt_split <- strsplit(products,"\\|")
+
+```
+
+```{r}
+
+library(readxl)
+```
+
+```{r}
+product_id <- sub(".*Product ID: ([0-9]+).*", "\\1", pdt_split)
+product_name <- sub(".*Product Name: ([^,]+).*", "\\1", pdt_split)
+print(product_id)
+print(product_name)
+```
+
+
+```{r}
+pdt_codes <- setNames(product_name, product_id)
+print(pdt_codes)
+```
+
+
+```{r}
+sep_pdt <- read.csv("G:/My Drive/a.UE24-25/STAT300/separated_orders_byproduct.csv")
+sep_pdt
+
+productID <- sep_pdt$ProductID
+productID
+
+```
+
+
+```{r}
+# Load necessary libraries
+library(shiny)
+library(ggplot2)
+
+# Define UI
+ui <- fluidPage(
+  titlePanel("Product Types Throughout The Year"),
+  sidebarLayout(
+    sidebarPanel(
+      checkboxGroupInput("selectedProducts", 
+                         "Select Products:", 
+                         choices = c("A", "B", "C"), 
+                         selected = c("A", "B", "C"))
+    ),
+    mainPanel(
+      plotOutput("productPlot")
+    )
+  )
+)
+
+# Define server logic
+server <- function(input, output) {
+  # Sample data
+  data <- data.frame(
+    ProductType = rep(c("A", "B", "C"), each = 12),
+    Month = rep(month.abb, 3),
+    Sales = rpois(36, lambda = 20)
+  )
+  
+  # Reactive expression to filter data based on selected products
+  filteredData <- reactive({
+    req(input$selectedProducts) # Ensure that input$selectedProducts is available
+    data[data$ProductType %in% input$selectedProducts, ]
+  })
+  
+  # Render plot
+  output$productPlot <- renderPlot({
+    ggplot(filteredData(), aes(x = Month, fill = ProductType)) +
+      geom_bar(position = "dodge") +
+      labs(title = "Product Types vs. Months",
+           x = "Month",
+           y = "Sales") +
+      theme_minimal()
+  })
+}
+
+# Run the application
+shinyApp(ui = ui, server = server)
+
+
+```
+
+
+
+```{r}
+# Load necessary libraries
+library(shiny)
+library(ggplot2)
+library(readxl)
+library(dplyr)  # For data manipulation
+
+# Define UI
+ui <- fluidPage(
+  titlePanel("Products Throughout The Months"),
+  sidebarLayout(
+    sidebarPanel(
+      uiOutput("productSelect") # Placeholder for dynamic UI input
+    ),
+    mainPanel(
+      plotOutput("productPlot")
+    )
+  )
+)
+
+# Define server logic
+server <- function(input, output, session) {
+  # Read data from Excel file
+  pdts_separated <- read.csv("G:/My Drive/a.UE24-25/STAT300/separated_orders_byproduct.csv")
+  
+  # Aggregate data: Count occurrences of each ProductID
+  aggregated_data <- pdts_separated %>%
+    group_by(ProductID) %>%
+    summarise(Count = n(), .groups = 'drop')
+  
+  # Extract unique product IDs from the aggregated data
+  product_types <- unique(aggregated_data$ProductID)
+  
+  # Create the UI for product selection dynamically
+  output$productSelect <- renderUI({
+    checkboxGroupInput("selectedProducts", 
+                       "Select Products:", 
+                       choices = product_types, 
+                       selected = product_types)
+  })
+  
+  # Reactive expression to filter and aggregate data based on selected products
+  filteredData <- reactive({
+    req(input$selectedProducts) # Ensure that input$selectedProducts is available
+    filtered_data <- data %>% 
+      filter(ProductID %in% input$selectedProducts) %>%
+      group_by(ProductID, Month) %>%
+      summarise(Sales = sum(Sales), .groups = 'drop')
+    filtered_data
+  })
+  
+  # Render plot
+  output$productPlot <- renderPlot({
+    ggplot(filteredData(), aes(x = Month, fill = ProductID, y = Sales)) +
+      geom_bar(stat = "identity", position = "dodge") +
+      labs(title = "Products Throughout The Months",
+           x = "Month",
+           y = "Sales") +
+      theme_minimal()
+  })
+}
+
+# Run the application
+shinyApp(ui = ui, server = server)
+
+```
+
+
+```{r}
+
+
+```
+
+
+```{r}
+
+
+```
+
