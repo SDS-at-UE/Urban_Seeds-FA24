@@ -29,7 +29,7 @@ server <- function(input, output, session) {
   data.month <- cbind(aggregated_data, date, Month, Year)
   
   data.zip_grouped <- data.month %>%
-    group_by(Customer.ID, Year, ZipCode) %>%
+    group_by(Customer.ID = as.factor(Customer.ID), Year, ZipCode) %>%
     summarise(TotalCount = n(), .groups = 'drop') %>%
     ungroup()
   
