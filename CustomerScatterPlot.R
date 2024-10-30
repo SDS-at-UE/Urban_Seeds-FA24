@@ -40,7 +40,7 @@ server <- function(input, output, session) {
            Year = as.numeric(format(OrderDate, "%Y")))
   
   data.month_grouped <- data.month %>%
-    group_by(Customer.ID, Month, Year) %>%
+    group_by(Customer.ID = as.factor(Customer.ID), Month, Year) %>%
     summarize(TotalCount = n(), .groups = 'drop')
   
   MonthGRAPH_filtered <- data.month_grouped %>%
