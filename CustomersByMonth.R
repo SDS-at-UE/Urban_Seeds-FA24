@@ -40,10 +40,9 @@ server <- function(input, output, session) {
   data.month
   
   data.month_grouped <- data.month %>%
-    group_by(Customer.ID, Month) %>%
+    group_by(Customer.ID = as.factor(Customer.ID), Month) %>%
     summarize(TotalCount = n()) %>%
     ungroup()
-  data.month_grouped
   
   product_types <- unique(aggregated_data$Customer.ID)
   
