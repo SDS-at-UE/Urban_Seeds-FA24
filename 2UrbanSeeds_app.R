@@ -333,7 +333,7 @@ ui <- navbarPage(leafletjs, theme = shinytheme("cosmo"),
                                        column(2,
                                        ),
                                        column(8,
-                                              plotOutut("productPlot"),
+                                              plotOutput("productPlot"),
                                               br()
                                               )
                                        ),
@@ -699,8 +699,10 @@ server <- function(input, output, session) {
     
     filtered_data <- MonthGRAPH %>%
       filter(Product_name %in% input$selectedProducts)
+    
     ggplot(filtered_data, aes(x = Month, y = TotalCount, color = Product_name)) +
       geom_point(size = 4, alpha = 0.7) +
+      geom_line()+
       facet_wrap(~ Year) + 
       labs(title = "Products Throughout The Months",
            x = "Month",
