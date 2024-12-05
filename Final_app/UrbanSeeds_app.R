@@ -960,7 +960,8 @@ server <- function(input, output, session) {
                             as.Date(paste0(end_year_month, "-01")), 
                             by = "month")
     
-    names(ddata)[31] <- c("Zip_Code")
+    a <- which(names(ddata) == "Billing.Zip")
+    names(ddata)[a] <- c("Zip_Code")
     
     
     ddata <- ddata %>% 
@@ -1050,7 +1051,8 @@ server <- function(input, output, session) {
                             as.Date(paste0(end_year_month, "-01")), 
                             by = "month")
     
-    names(Data)[7] <- c("Zip_Code")
+    a <- which(names(Data) == "Billing.Zip")
+    names(Data)[a] <- c("Zip_Code")
     
     Data <- Data %>% 
       mutate(month_dates= monthly_sequence[findInterval(Order.Date, monthly_sequence)])
@@ -2193,6 +2195,7 @@ server <- function(input, output, session) {
   # })
   
   output$revenue_zip <- renderTable({
+    req(zip_data())
     DD <- revenue_coupon()%>% 
       filter(Zip_Code == GRIDrv()) %>%
       select(Year, Subtotal..inc.tax., Order.Total..inc.tax.) %>% 
@@ -2207,6 +2210,7 @@ server <- function(input, output, session) {
   })
   
   output$totalcoupon_zip <- renderTable({
+    req(zip_data())
     DD <- revenue_coupon()%>% 
       filter(Zip_Code == GRIDrv()) %>%
       select(Year, Subtotal..inc.tax., Order.Total..inc.tax.) %>% 
